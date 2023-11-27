@@ -13,6 +13,7 @@ class PlatformStrings {
   static const String stopRecordingVideo = "stop_recording_video";
   static const String checkVersion = "check_version";
   static const String dispose = "dispose";
+  static const String backgroundBlur = "background_blur";
 
   // Method arguments
   static const String licenseKey = "license_key";

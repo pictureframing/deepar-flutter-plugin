@@ -13,6 +13,8 @@ public  class MethodStrings {
     public final static  String startRecordingVideo = "start_recording_video";
     public final static  String stopRecordingVideo = "stop_recording_video";
     public final  static  String dispose = "dispose";
+    public final  static  String backgroundBlur = "background_blur";
+    public final  static  String backgroundReplacement = "background_replacement";
 
     // Method arguments
     public final static  String licenseKey = "license_key";

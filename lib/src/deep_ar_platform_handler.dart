@@ -12,10 +12,8 @@ enum VideoResponse { videoStarted, videoCompleted, videoError }
 enum ScreenshotResponse { screenshotTaken }
 
 class DeepArPlatformHandler {
-  static const MethodChannel _channel =
-      MethodChannel(PlatformStrings.generalChannel);
-  static const MethodChannel _cameraXChannel =
-      MethodChannel(PlatformStrings.cameraXChannel);
+  static const MethodChannel _channel = MethodChannel(PlatformStrings.generalChannel);
+  static const MethodChannel _cameraXChannel = MethodChannel(PlatformStrings.cameraXChannel);
   MethodChannel _avCameraChannel(int view) =>
       MethodChannel(PlatformStrings.avCameraChannel + "/$view");
   static VideoResponse? _videoResponse;
@@ -78,8 +76,7 @@ class DeepArPlatformHandler {
   }
 
   Future<int> startCameraAndroid() async {
-    int texturedId =
-        await _cameraXChannel.invokeMethod(PlatformStrings.startCamera);
+    int texturedId = await _cameraXChannel.invokeMethod(PlatformStrings.startCamera);
     return texturedId;
   }
 
@@ -90,8 +87,7 @@ class DeepArPlatformHandler {
   }
 
   Future<String?> switchCameraIos(String? effect, int view) {
-    return _avCameraChannel(view)
-        .invokeMethod<String>(PlatformStrings.switchEffect, {
+    return _avCameraChannel(view).invokeMethod<String>(PlatformStrings.switchEffect, {
       PlatformStrings.effect: effect,
     });
   }
@@ -149,13 +145,11 @@ class DeepArPlatformHandler {
   }
 
   Future<void> startRecordingVideoIos(int view) async {
-    await _avCameraChannel(view)
-        .invokeMethod<String>(PlatformStrings.startRecordingVideo);
+    await _avCameraChannel(view).invokeMethod<String>(PlatformStrings.startRecordingVideo);
   }
 
   Future<String?> stopRecordingVideoIos(int view) async {
-    await _avCameraChannel(view)
-        .invokeMethod<String>(PlatformStrings.stopRecordingVideo);
+    await _avCameraChannel(view).invokeMethod<String>(PlatformStrings.stopRecordingVideo);
     final Completer completer = Completer<String>();
     Timer.periodic(const Duration(milliseconds: 200), (timer) {
       if (timer.tick > 20) {
@@ -179,8 +173,8 @@ class DeepArPlatformHandler {
   }
 
   Future<String?> getResolutionDimensions(int view) async {
-    final dimensions = await _avCameraChannel(view)
-        .invokeMethod<String?>(PlatformStrings.getResolution);
+    final dimensions =
+        await _avCameraChannel(view).invokeMethod<String?>(PlatformStrings.getResolution);
     return dimensions;
   }
 
@@ -235,8 +229,7 @@ class DeepArPlatformHandler {
   }
 
   Future<bool> toggleFlashIos(int view) async {
-    return await _avCameraChannel(view).invokeMethod<bool>("toggle_flash") ??
-        false;
+    return await _avCameraChannel(view).invokeMethod<bool>("toggle_flash") ?? false;
   }
 
   Future<String?> destroy() async {
@@ -248,10 +241,7 @@ class DeepArPlatformHandler {
   }
 
   Future<void> switchEffectWithSlot(
-      {required String slot,
-      required String path,
-      String targetGameObject = '',
-      int face = 0}) {
+      {required String slot, required String path, String targetGameObject = '', int face = 0}) {
     return _channel.invokeMethod("switchEffectWithSlot", {
       "slot": slot,
       "path": path,
@@ -261,10 +251,7 @@ class DeepArPlatformHandler {
   }
 
   Future<void> switchEffectWithSlotIos(int view,
-      {required String slot,
-      required String path,
-      String targetGameObject = '',
-      int face = 0}) {
+      {required String slot, required String path, String targetGameObject = '', int face = 0}) {
     return _avCameraChannel(view).invokeMethod("switchEffectWithSlot", {
       "slot": slot,
       "path": path,
@@ -278,8 +265,7 @@ class DeepArPlatformHandler {
   }
 
   Future<void> fireTriggerIos(int view, String trigger) {
-    return _avCameraChannel(view)
-        .invokeMethod("fireTrigger", {"trigger": trigger});
+    return _avCameraChannel(view).invokeMethod("fireTrigger", {"trigger": trigger});
   }
 
   Future<void> showStats(bool enabled) {
@@ -287,8 +273,7 @@ class DeepArPlatformHandler {
   }
 
   Future<void> showStatsIos(int view, bool enabled) {
-    return _avCameraChannel(view)
-        .invokeMethod("showStats", {"enabled": enabled});
+    return _avCameraChannel(view).invokeMethod("showStats", {"enabled": enabled});
   }
 
   Future<void> simulatePhysics(bool enabled) {
@@ -296,8 +281,7 @@ class DeepArPlatformHandler {
   }
 
   Future<void> simulatePhysicsIos(int view, bool enabled) {
-    return _avCameraChannel(view)
-        .invokeMethod("simulatePhysics", {"enabled": enabled});
+    return _avCameraChannel(view).invokeMethod("simulatePhysics", {"enabled": enabled});
   }
 
   Future<void> showColliders(bool enabled) {
@@ -305,12 +289,10 @@ class DeepArPlatformHandler {
   }
 
   Future<void> showCollidersIos(int view, bool enabled) {
-    return _avCameraChannel(view)
-        .invokeMethod("showColliders", {"enabled": enabled});
+    return _avCameraChannel(view).invokeMethod("showColliders", {"enabled": enabled});
   }
 
-  Future<void> moveGameObject(
-      String selectedGameObjectName, String targetGameObjectName) {
+  Future<void> moveGameObject(String selectedGameObjectName, String targetGameObjectName) {
     return _channel.invokeMethod("fireTrigger", {
       "selectedGameObjectName": selectedGameObjectName,
       "targetGameObjectName": targetGameObjectName
@@ -331,5 +313,29 @@ class DeepArPlatformHandler {
 
   Future<void> changeParameterIos(int view, Map<String, dynamic> arguments) {
     return _avCameraChannel(view).invokeMethod("changeParameter", arguments);
+  }
+
+  Future<void> backgroundBlur({
+    bool enabled = true,
+    int blurStrength = 5,
+  }) {
+    return _channel.invokeMethod(PlatformStrings.backgroundBlur, {
+      "enabled": enabled,
+      "blurStrength": blurStrength,
+    });
+  }
+
+  Future<void> backgroundBlurIos(
+    int view, {
+    bool enabled = true,
+    int blurStrength = 5,
+  }) {
+    return _avCameraChannel(view).invokeMethod(
+      PlatformStrings.backgroundBlur,
+      {
+        "enabled": enabled,
+        "blurStrength": blurStrength,
+      },
+    );
   }
 }

@@ -1,6 +1,7 @@
 package com.deepar.ai;
 
 import androidx.annotation.NonNull;
+
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
@@ -20,6 +21,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.io.IOException;
 import java.io.InputStream;
+
 import android.graphics.BitmapFactory;
 
 import ai.deepar.ar.ARErrorType;
@@ -99,13 +101,13 @@ public class DeepArPlugin implements FlutterPlugin, AREventListener, ActivityAwa
                 String licenseKey = (String) arguments.get(MethodStrings.licenseKey);
                 String resolution = (String) arguments.get(MethodStrings.resolution);
 
-                if(resolution.equals("veryHigh"))
+                if (resolution.equals("veryHigh"))
                     resolutionPreset = CameraResolutionPreset.P1920x1080;
-                 else if(resolution.equals("high"))
+                else if (resolution.equals("high"))
                     resolutionPreset = CameraResolutionPreset.P1280x720;
-                 else if(resolution.equals("medium"))
+                else if (resolution.equals("medium"))
                     resolutionPreset = CameraResolutionPreset.P640x480;
-                 else
+                else
                     resolutionPreset = CameraResolutionPreset.P640x360;
 
                 Log.d(TAG, "licenseKey = " + licenseKey);
@@ -135,7 +137,7 @@ public class DeepArPlugin implements FlutterPlugin, AREventListener, ActivityAwa
                     videoFilePath = file.getPath();
                     deepAR.startVideoRecording(videoFilePath);
                     result.success("Video recording started");
-                
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e("DeepAR", "Error : Unable to create file");
@@ -146,8 +148,8 @@ public class DeepArPlugin implements FlutterPlugin, AREventListener, ActivityAwa
                 break;
 
             case MethodStrings.stopRecordingVideo:
-                 deepAR.stopVideoRecording();
-                 result.success("STOPPING_RECORDING");
+                deepAR.stopVideoRecording();
+                result.success("STOPPING_RECORDING");
                 break;
             case "take_screenshot":
                 deepAR.takeScreenshot();
@@ -170,12 +172,12 @@ public class DeepArPlugin implements FlutterPlugin, AREventListener, ActivityAwa
                     e.printStackTrace();
                     result.error("111", "switchMask failed", e.getMessage());
                 }
-                
+
                 break;
 
             case "switch_filter":
                 String filter = ((String) arguments.get("effect"));
-                if (filter == null || filter.equals("null")){
+                if (filter == null || filter.equals("null")) {
                     deepAR.switchEffect("filters", "null");
                     result.success("switchFilter called & reset success");
                     return;
@@ -198,28 +200,28 @@ public class DeepArPlugin implements FlutterPlugin, AREventListener, ActivityAwa
 
                 try {
                     face = (int) arguments.get("face");
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
                 try {
                     targetGameObject = ((String) arguments.get("targetGameObject"));
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
                 try {
 
-                    if (path != null && path.toLowerCase().endsWith("none") ){
+                    if (path != null && path.toLowerCase().endsWith("none")) {
                         deepAR.switchEffect(slot, getResetPath()); // reset applied effect
                         result.success("switchEffectWithSlot reset success");
                         return;
                     }
 
                     InputStream inputStream = _getAssetFileInputStream(path);
-                    if (targetGameObject != null && !targetGameObject.isEmpty()){
+                    if (targetGameObject != null && !targetGameObject.isEmpty()) {
                         deepAR.switchEffect(slot, inputStream, face, targetGameObject);
-                    }else{
+                    } else {
                         deepAR.switchEffect(slot, inputStream, face);
                     }
                     inputStream.close();
@@ -262,31 +264,28 @@ public class DeepArPlugin implements FlutterPlugin, AREventListener, ActivityAwa
                 String parameter = ((String) arguments.get("parameter"));
                 Object newParameter = arguments.get("newParameter");
 
-                if (newParameter == null){
+                if (newParameter == null) {
 
                     float x = ((Double) arguments.get("x")).floatValue();
                     float y = ((Double) arguments.get("y")).floatValue();
                     float z = ((Double) arguments.get("z")).floatValue();
                     Object w = arguments.get("w");
 
-                    if (w == null){
+                    if (w == null) {
                         deepAR.changeParameterVec3(gameObject, component, parameter, x, y, z);
                         result.success("changeParameter called successfully");
-                    }else{
+                    } else {
                         float floatValueW = ((Double) w).floatValue();
                         deepAR.changeParameterVec4(gameObject, component, parameter, x, y, z, floatValueW);
                         result.success("changeParameter called successfully");
                     }
-                }
-                else if (newParameter instanceof Boolean){
+                } else if (newParameter instanceof Boolean) {
                     deepAR.changeParameterBool(gameObject, component, parameter, (Boolean) newParameter);
                     result.success("changeParameter called successfully");
-                }
-                else if (newParameter instanceof Double){
+                } else if (newParameter instanceof Double) {
                     deepAR.changeParameterFloat(gameObject, component, parameter, ((Double) newParameter).floatValue());
                     result.success("changeParameter called successfully");
-                } 
-                else if (newParameter instanceof String) {
+                } else if (newParameter instanceof String) {
                     try {
                         InputStream inputStream = _getAssetFileInputStream((String) newParameter);
                         Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
@@ -299,12 +298,30 @@ public class DeepArPlugin implements FlutterPlugin, AREventListener, ActivityAwa
                     }
                 }
                 break;
+
+            case MethodStrings.backgroundBlur:
+                enabled = ((boolean) arguments.get("enabled"));
+                int blurStrength = ((int) arguments.get("blurStrength"));
+
+                deepAR.backgroundBlur(true, blurStrength);
+                result.success("backgroundBlur called successfully");
+
+                break;
+
+            case MethodStrings.backgroundReplacement:
+                String imagePath = ((String) arguments.get("imagePath"));
+                Bitmap image = BitmapFactory.decodeFile(imagePath);
+
+                deepAR.backgroundReplacement(enabled, image);
+
+                break;
+
         }
 
 
     }
 
-    private String getResetPath(){
+    private String getResetPath() {
         return null;
     }
 
@@ -346,6 +363,14 @@ public class DeepArPlugin implements FlutterPlugin, AREventListener, ActivityAwa
             deepAR.setLicenseKey(licenseKey);
             deepAR.initialize(activity, this);
             deepAR.changeLiveMode(true);
+
+            deepAR.setFaceTrackingInitParameters(
+                    new DeepAR.FaceTrackingInitParameters(
+                            true,
+                            true
+                    )
+            );
+
 
             TextureRegistry.SurfaceTextureEntry entry = flutterPlugin.getTextureRegistry().createSurfaceTexture();
             tempSurfaceTexture = entry.surfaceTexture();
@@ -392,19 +417,19 @@ public class DeepArPlugin implements FlutterPlugin, AREventListener, ActivityAwa
 
     @Override
     public void videoRecordingStarted() {
-        Log.d(TAG, "videoRecordingStarted: "+videoFilePath);
+        Log.d(TAG, "videoRecordingStarted: " + videoFilePath);
         videoResult(DeepArResponse.videoStarted, "video success");
     }
 
     @Override
     public void videoRecordingFinished() {
-        Log.d(TAG, "videoRecordingFinished: "+videoFilePath);
+        Log.d(TAG, "videoRecordingFinished: " + videoFilePath);
         videoResult(DeepArResponse.videoCompleted, "video success");
     }
 
     @Override
     public void videoRecordingFailed() {
-        Log.d(TAG, "videoRecordingFailed: "+videoFilePath);
+        Log.d(TAG, "videoRecordingFailed: " + videoFilePath);
         videoResult(DeepArResponse.videoError, "video failed");
     }
 
@@ -449,26 +474,26 @@ public class DeepArPlugin implements FlutterPlugin, AREventListener, ActivityAwa
 
     @Override
     public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        Log.d(TAG, "onRequestPermissionsResult: "+requestCode);
+        Log.d(TAG, "onRequestPermissionsResult: " + requestCode);
         return false;
     }
 
-    private void videoResult(DeepArResponse callerResponse, String message){
-        Map<String, Object> map= new HashMap<String, Object>();
+    private void videoResult(DeepArResponse callerResponse, String message) {
+        Map<String, Object> map = new HashMap<String, Object>();
         map.put("caller", callerResponse.name());
         map.put("message", message);
-        if (callerResponse == DeepArResponse.videoCompleted){
+        if (callerResponse == DeepArResponse.videoCompleted) {
             map.put("file_path", videoFilePath);
             videoFilePath = "";
         }
         channel.invokeMethod("on_video_result", map);
     }
 
-    private void screenshotResult(DeepArResponse callerResponse, String message){
-        Map<String, Object> map= new HashMap<String, Object>();
+    private void screenshotResult(DeepArResponse callerResponse, String message) {
+        Map<String, Object> map = new HashMap<String, Object>();
         map.put("caller", callerResponse.name());
         map.put("message", message);
-        if (callerResponse == DeepArResponse.screenshotTaken){
+        if (callerResponse == DeepArResponse.screenshotTaken) {
             map.put("file_path", screenshotPath);
             screenshotPath = "";
         }

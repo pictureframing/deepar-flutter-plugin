@@ -64,8 +64,10 @@ class _HomeState extends State<Home> {
     _controller = DeepArController();
     _controller
         .initialize(
-          androidLicenseKey: "---android key---",
-          iosLicenseKey: "---iOS key---",
+          androidLicenseKey:
+              "fa4c7f35f9f8e8240d42ebcc1840aa2a947087c8025fbc2a97fdab7f0a207cc0a84590a8648284f0",
+          iosLicenseKey:
+              "312749c8c6eb2a8700860fec8f638889b21a88aaf9d3dbec28d2b08bec95bb7b79f361eb48888600",
           resolution: Resolution.high,
         )
         .then((value) => setState(() {}));
@@ -123,26 +125,27 @@ class _HomeState extends State<Home> {
             },
             color: Colors.white70,
             iconSize: 40,
-            icon:
-                Icon(_controller.flashState ? Icons.flash_on : Icons.flash_off),
+            icon: Icon(_controller.flashState ? Icons.flash_on : Icons.flash_off),
           ),
           IconButton(
             onPressed: () async {
-              _isFaceMask = !_isFaceMask;
-              if (_isFaceMask) {
-                _controller.switchFaceMask(_maskList[_maskIndex]);
-              } else {
-                _controller.switchFaceMask("null");
-              }
+              _controller.backgroundBlur(
+                enabled: true,
+                blurStrength: 2,
+              );
+              // _isFaceMask = !_isFaceMask;
+              // if (_isFaceMask) {
+              //   _controller.switchFaceMask(_maskList[_maskIndex]);
+              // } else {
+              //   _controller.switchFaceMask("null");
+              // }
 
               setState(() {});
             },
             color: Colors.white70,
             iconSize: 40,
             icon: Icon(
-              _isFaceMask
-                  ? Icons.face_retouching_natural_rounded
-                  : Icons.face_retouching_off,
+              _isFaceMask ? Icons.face_retouching_natural_rounded : Icons.face_retouching_off,
             ),
           ),
           IconButton(
@@ -217,9 +220,8 @@ class _HomeState extends State<Home> {
                 },
                 iconSize: 50,
                 color: Colors.white70,
-                icon: Icon(_controller.isRecording
-                    ? Icons.videocam_sharp
-                    : Icons.videocam_outlined)),
+                icon:
+                    Icon(_controller.isRecording ? Icons.videocam_sharp : Icons.videocam_outlined)),
             const SizedBox(width: 20),
             IconButton(
                 onPressed: () {
@@ -229,8 +231,7 @@ class _HomeState extends State<Home> {
                     });
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Photo Capture Failed',
-                          style: TextStyle(color: Colors.white)),
+                      content: Text('Photo Capture Failed', style: TextStyle(color: Colors.white)),
                       backgroundColor: Colors.red,
                     ));
                   }
@@ -294,12 +295,9 @@ class _HomeState extends State<Home> {
   /// Get all deepar effects from assets
   ///
   Future<List<String>> _getEffectsFromAssets(BuildContext context) async {
-    final manifestContent =
-        await DefaultAssetBundle.of(context).loadString('AssetManifest.json');
+    final manifestContent = await DefaultAssetBundle.of(context).loadString('AssetManifest.json');
     final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-    final filePaths = manifestMap.keys
-        .where((path) => path.startsWith(_assetEffectsPath))
-        .toList();
+    final filePaths = manifestMap.keys.where((path) => path.startsWith(_assetEffectsPath)).toList();
     return filePaths;
   }
 
