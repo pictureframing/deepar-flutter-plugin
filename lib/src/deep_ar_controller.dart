@@ -353,7 +353,7 @@ class DeepArController {
     );
   }
 
-  ///Enable/Disable Background Replacement
+  ///Enable/Disable Background Replacement.
   Future<void> backgroundReplacement(
       {required bool enabled, required String imagePath}) async {
     await platformRun(
