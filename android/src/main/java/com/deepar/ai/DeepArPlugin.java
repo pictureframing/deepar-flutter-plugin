@@ -303,12 +303,13 @@ public class DeepArPlugin implements FlutterPlugin, AREventListener, ActivityAwa
                 enabled = ((boolean) arguments.get("enabled"));
                 int blurStrength = ((int) arguments.get("blurStrength"));
 
-                deepAR.backgroundBlur(true, blurStrength);
+                deepAR.backgroundBlur(enabled, blurStrength);
                 result.success("backgroundBlur called successfully");
 
                 break;
 
             case MethodStrings.backgroundReplacement:
+                enabled = ((boolean) arguments.get("enabled"));
                 String imagePath = ((String) arguments.get("imagePath"));
                 Bitmap image = BitmapFactory.decodeFile(imagePath);
 
