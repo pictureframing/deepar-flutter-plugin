@@ -62,7 +62,7 @@ class DeepARCameraView: NSObject, FlutterPlatformView, DeepARDelegate {
     
     private var deepAR: DeepAR!
     private var cameraController: CameraController!
-    private var arView: ARView!
+    private var arView: UIView!
     private var frame:CGRect!
     
     
@@ -204,9 +204,19 @@ class DeepARCameraView: NSObject, FlutterPlatformView, DeepARDelegate {
             }
 
             result("changeParameter called successfully")
-            
+        case "background_blur":
+            let enabled:Bool = args?["enabled"] as! Bool
+            let blurStrength:Int = args?["blurStrength"] as! Int
+            deepAR.backgroundBlur(enabled, strength: blurStrength);
+            result("backgroundBlur called successfully");
+
+        case "background_replacement":
+            let enabled:Bool = args?["enabled"] as! Bool
+            let imagePath:String = args?["imagePath"] as! String
+            deepAR.backgroundReplacement(enabled, image: UIImage(named: imagePath))
+            result("backgroundBlur called successfully");
+
         case "destroy":
-            cameraController.stopCamera()
             deepAR.shutdown()
             result("SHUTDOWN");
         default:
@@ -234,7 +244,7 @@ class DeepARCameraView: NSObject, FlutterPlatformView, DeepARDelegate {
         
         deepAR.changeLiveMode(true);
         
-        self.arView = self.deepAR.createARView(withFrame: self.frame) as? ARView
+        self.arView = self.deepAR.createARView(withFrame: self.frame) as? UIView
         cameraController.startCamera()
         
         NotificationCenter.default.addObserver(self, selector: #selector(orientationDidChange), name: UIDevice.orientationDidChangeNotification, object: nil)
