@@ -58,30 +58,39 @@ class DeepArController {
   ///Get current  camera direction as [CameraDirection.front] or [CameraDirection.rear]
   CameraDirection get cameraDirection => _cameraDirection;
 
-  ///Initializes the DeepAR SDK with license keys and asks for required camera and microphone permissions.
-  ///Returns false if fails to initialize.
+  /// Initializes the DeepAR SDK with license keys and asks for required camera
+  /// and microphone permissions. Returns false if fails to initialize.
   ///
-  ///[androidLicenseKey] and [iosLicenseKey] both cannot be null together.
+  /// Requests both microphone and camera permissions by default. Set [requestPermissions]
+  /// to false to skip permission requests. In that case, it is assumed that the
+  /// user has already granted the required permissions.
   ///
-  ///Recommended resolution: [Resolution.high] for optimum quality without performance tradeoffs
+  /// [androidLicenseKey] and [iosLicenseKey] both cannot be null together.
+  ///
+  /// Recommended resolution: [Resolution.high] for optimum quality without performance tradeoffs
   Future<bool> initialize({
     required String? androidLicenseKey,
     required String? iosLicenseKey,
     Resolution resolution = Resolution.high,
+    bool requestPermissions = true,
   }) async {
     assert(androidLicenseKey != null || iosLicenseKey != null,
         "Both android and iOS license keys cannot be null");
 
     _iosLicenseKey = iosLicenseKey;
     _resolution = resolution;
-    _hasPermission = await _askMediaPermission();
+
+    if (requestPermissions) {
+      _hasPermission = await _askMediaPermission();
+    } else {
+      _hasPermission = true;
+    }
 
     if (!_hasPermission) return false;
 
     if (Platform.isAndroid) {
       assert(androidLicenseKey != null, "androidLicenseKey missing");
-      String? dimensions = await _deepArPlatformHandler.initialize(
-          androidLicenseKey!, resolution);
+      String? dimensions = await _deepArPlatformHandler.initialize(androidLicenseKey!, resolution);
       if (dimensions != null) {
         _imageSize = sizeFromEncodedString(dimensions);
         _aspectRatio = _imageSize!.width / _imageSize!.height;
@@ -124,9 +133,7 @@ class DeepArController {
           creationParamsCodec: const StandardMessageCodec(),
           onPlatformViewCreated: ((id) {
             _textureId = id;
-            _deepArPlatformHandler
-                .getResolutionDimensions(_textureId!)
-                .then((value) {
+            _deepArPlatformHandler.getResolutionDimensions(_textureId!).then((value) {
               if (value != null) {
                 _imageSize = sizeFromEncodedString(value);
                 _aspectRatio = _imageSize!.width / _imageSize!.height;
@@ -159,8 +166,7 @@ class DeepArController {
     }
     final _file = await platformRun(
         androidFunction: _deepArPlatformHandler.stopRecordingVideoAndroid,
-        iOSFunction: () =>
-            _deepArPlatformHandler.stopRecordingVideoIos(_textureId!));
+        iOSFunction: () => _deepArPlatformHandler.stopRecordingVideoIos(_textureId!));
     _isRecording = false;
     if (_file == "ENDED_WITH_ERROR") throw ("Video capture failed");
 
@@ -171,8 +177,7 @@ class DeepArController {
   Future<File> takeScreenshot() async {
     final _file = await platformRun(
         androidFunction: _deepArPlatformHandler.takeScreenShot,
-        iOSFunction: () =>
-            _deepArPlatformHandler.takeScreenShotIos(_textureId!));
+        iOSFunction: () => _deepArPlatformHandler.takeScreenShotIos(_textureId!));
     if (_file == "ENDED_WITH_ERROR") throw ("Screenshot capture failed");
 
     return File(_file!);
@@ -181,50 +186,39 @@ class DeepArController {
   ///Switch DeepAR with the passed [effect] path from assets
   Future<String?> switchEffect(String? effect) {
     return platformRun(
-        androidFunction: () =>
-            _deepArPlatformHandler.switchEffectAndroid(effect),
-        iOSFunction: () =>
-            _deepArPlatformHandler.switchCameraIos(effect, _textureId!));
+        androidFunction: () => _deepArPlatformHandler.switchEffectAndroid(effect),
+        iOSFunction: () => _deepArPlatformHandler.switchCameraIos(effect, _textureId!));
   }
 
   ///Load contents of a DeepAR Studio file as an effect/filter in the scene
   Future<void> switchEffectWithSlot(
-      {required String slot,
-      required String path,
-      String? targetGameObject,
-      int? face}) async {
+      {required String slot, required String path, String? targetGameObject, int? face}) async {
     await platformRun(
-        androidFunction: () =>
-            _deepArPlatformHandler.switchEffectWithSlot(slot: slot, path: path),
-        iOSFunction: () => _deepArPlatformHandler
-            .switchEffectWithSlotIos(_textureId!, slot: slot, path: path));
+        androidFunction: () => _deepArPlatformHandler.switchEffectWithSlot(slot: slot, path: path),
+        iOSFunction: () =>
+            _deepArPlatformHandler.switchEffectWithSlotIos(_textureId!, slot: slot, path: path));
   }
 
   ///Switch DeepAR with the passed [mask] path from assets
   Future<String?> switchFaceMask(String? mask) {
     return platformRun(
-        androidFunction: () =>
-            _deepArPlatformHandler.switchFaceMaskAndroid(mask),
-        iOSFunction: () =>
-            _deepArPlatformHandler.switchFaceMaskIos(mask, _textureId!));
+        androidFunction: () => _deepArPlatformHandler.switchFaceMaskAndroid(mask),
+        iOSFunction: () => _deepArPlatformHandler.switchFaceMaskIos(mask, _textureId!));
   }
 
   ///Switch DeepAR with the passed [filter] path from assets
   Future<String?> switchFilter(String? filter) {
     return platformRun(
-        androidFunction: () =>
-            _deepArPlatformHandler.switchFilterAndroid(filter),
-        iOSFunction: () =>
-            _deepArPlatformHandler.switchFilterIos(filter, _textureId!));
+        androidFunction: () => _deepArPlatformHandler.switchFilterAndroid(filter),
+        iOSFunction: () => _deepArPlatformHandler.switchFilterIos(filter, _textureId!));
   }
 
   ///Moves the selected game object from its current position in a tree and sets it as a direct child of a target game object.
   Future<void> moveGameObject(
-      {required String selectedGameObjectName,
-      required String targetGameObjectName}) async {
+      {required String selectedGameObjectName, required String targetGameObjectName}) async {
     await platformRun(
-        androidFunction: () => _deepArPlatformHandler.moveGameObject(
-            selectedGameObjectName, targetGameObjectName),
+        androidFunction: () =>
+            _deepArPlatformHandler.moveGameObject(selectedGameObjectName, targetGameObjectName),
         iOSFunction: () => _deepArPlatformHandler.moveGameObjectIos(
             _textureId!, selectedGameObjectName, targetGameObjectName));
   }
@@ -263,10 +257,8 @@ class DeepArController {
       }
 
       await platformRun(
-          androidFunction: () =>
-              _deepArPlatformHandler.changeParameter(arguments),
-          iOSFunction: () => _deepArPlatformHandler.changeParameterIos(
-              _textureId!, arguments));
+          androidFunction: () => _deepArPlatformHandler.changeParameter(arguments),
+          iOSFunction: () => _deepArPlatformHandler.changeParameterIos(_textureId!, arguments));
     } else {
       debugPrint("Invalid datatype passed in newParameter");
       throw ("Invalid field newParameter. Please refer docs to pass correct value.");
@@ -279,9 +271,8 @@ class DeepArController {
         androidFunction: _deepArPlatformHandler.flipCamera,
         iOSFunction: () => _deepArPlatformHandler.flipCameraIos(_textureId!));
     if (result != null && result) {
-      _cameraDirection = _cameraDirection == CameraDirection.front
-          ? CameraDirection.rear
-          : CameraDirection.front;
+      _cameraDirection =
+          _cameraDirection == CameraDirection.front ? CameraDirection.rear : CameraDirection.front;
       if (_cameraDirection == CameraDirection.front) _flashState = false;
     }
     return _cameraDirection;
@@ -300,32 +291,28 @@ class DeepArController {
   Future<void> fireTrigger({required String trigger}) async {
     await platformRun(
         androidFunction: () => _deepArPlatformHandler.fireTrigger(trigger),
-        iOSFunction: () =>
-            _deepArPlatformHandler.fireTriggerIos(_textureId!, trigger));
+        iOSFunction: () => _deepArPlatformHandler.fireTriggerIos(_textureId!, trigger));
   }
 
   ///Display debugging stats on screen.
   Future<void> showStats({required bool enabled}) async {
     await platformRun(
         androidFunction: () => _deepArPlatformHandler.showStats(enabled),
-        iOSFunction: () =>
-            _deepArPlatformHandler.showStatsIos(_textureId!, enabled));
+        iOSFunction: () => _deepArPlatformHandler.showStatsIos(_textureId!, enabled));
   }
 
   ///Enable or disable global physics simulation.
   Future<void> simulatePhysics({required bool enabled}) async {
     await platformRun(
         androidFunction: () => _deepArPlatformHandler.simulatePhysics(enabled),
-        iOSFunction: () =>
-            _deepArPlatformHandler.simulatePhysicsIos(_textureId!, enabled));
+        iOSFunction: () => _deepArPlatformHandler.simulatePhysicsIos(_textureId!, enabled));
   }
 
   ///Display physics colliders preview on screen.
   Future<void> showColliders({required bool enabled}) async {
     await platformRun(
         androidFunction: () => _deepArPlatformHandler.showColliders(enabled),
-        iOSFunction: () =>
-            _deepArPlatformHandler.showCollidersIos(_textureId!, enabled));
+        iOSFunction: () => _deepArPlatformHandler.showCollidersIos(_textureId!, enabled));
   }
 
   ///Releases all resources required by DeepAR.
@@ -354,15 +341,12 @@ class DeepArController {
   }
 
   ///Enable/Disable Background Replacement.
-  Future<void> backgroundReplacement(
-      {required bool enabled, required String imagePath}) async {
+  Future<void> backgroundReplacement({required bool enabled, required String imagePath}) async {
     await platformRun(
-        androidFunction: () => _deepArPlatformHandler.backgroundReplacement(
-            enabled: enabled, imagePath: imagePath),
-        iOSFunction: () => _deepArPlatformHandler.backgroundReplacementIos(
-            _textureId!,
-            enabled: enabled,
-            imagePath: imagePath));
+        androidFunction: () =>
+            _deepArPlatformHandler.backgroundReplacement(enabled: enabled, imagePath: imagePath),
+        iOSFunction: () => _deepArPlatformHandler.backgroundReplacementIos(_textureId!,
+            enabled: enabled, imagePath: imagePath));
   }
 
   ///Listen to native delegate methods
@@ -382,8 +366,7 @@ class DeepArController {
       Permission.microphone,
     ].request();
 
-    if (await Permission.camera.isGranted &&
-        await Permission.microphone.isGranted) {
+    if (await Permission.camera.isGranted && await Permission.microphone.isGranted) {
       return true;
     }
 
