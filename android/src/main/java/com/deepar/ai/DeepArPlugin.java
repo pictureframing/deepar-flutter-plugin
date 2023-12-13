@@ -365,14 +365,6 @@ public class DeepArPlugin implements FlutterPlugin, AREventListener, ActivityAwa
             deepAR.initialize(activity, this);
             deepAR.changeLiveMode(true);
 
-            deepAR.setFaceTrackingInitParameters(
-                    new DeepAR.FaceTrackingInitParameters(
-                            true,
-                            true
-                    )
-            );
-
-
             TextureRegistry.SurfaceTextureEntry entry = flutterPlugin.getTextureRegistry().createSurfaceTexture();
             tempSurfaceTexture = entry.surfaceTexture();
             tempSurfaceTexture.setDefaultBufferSize(width, height);
