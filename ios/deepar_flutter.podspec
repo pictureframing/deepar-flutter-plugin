@@ -1,7 +1,9 @@
-#
-# To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint deepar.podspec` to validate before publishing.
-#
+
+# For newer versions of DeepAR, check the changelog for the iOS-platform:
+# https://docs.deepar.ai/deepar-sdk/platforms/ios/changelog
+DeepARVersion = '5.5.1'
+
+
 Pod::Spec.new do |s|
   s.name             = 'deepar_flutter'
   s.version          = '0.0.6'
@@ -22,7 +24,7 @@ Official Flutter SDK for DeepAR Plugin.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   s.swift_version = '5.0'
 
-  s.dependency  "DeepAR", "5.4.4"
+  s.dependency  "DeepAR", DeepARVersion
   
   s.preserve_paths = 'DeepAR.framework/**/*'
   s.xcconfig = { 'OTHER_LDFLAGS' => '-framework DeepAR' }

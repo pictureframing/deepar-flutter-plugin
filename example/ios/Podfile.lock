@@ -1,10 +1,12 @@
 PODS:
-  - deepar_flutter (0.0.5):
+  - DeepAR (5.5.1)
+  - deepar_flutter (0.0.6):
+    - DeepAR (= 5.5.1)
     - Flutter
   - Flutter (1.0.0)
   - open_file (0.0.1):
     - Flutter
-  - permission_handler_apple (9.0.4):
+  - permission_handler_apple (9.1.1):
     - Flutter
 
 DEPENDENCIES:
@@ -12,6 +14,10 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - open_file (from `.symlinks/plugins/open_file/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+
+SPEC REPOS:
+  trunk:
+    - DeepAR
 
 EXTERNAL SOURCES:
   deepar_flutter:
@@ -24,11 +30,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
 
 SPEC CHECKSUMS:
-  deepar_flutter: e89060abce0c460f36a0bf73802f8a5443f1fdb5
+  DeepAR: 99c8df1c9346b925f5e5efc834853cbbccb09d1d
+  deepar_flutter: 1e2a99dbafe7b723cf78e2340acdddc01033c59f
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
-  permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
+  permission_handler_apple: e76247795d700c14ea09e3a2d8855d41ee80a2e6
 
-PODFILE CHECKSUM: 4ac4f8a0213f258358939df5229bdc3e24797d55
+PODFILE CHECKSUM: 6cc61d5d5d502d86fcafd72ee0c0c13158fcad05
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.14.3
