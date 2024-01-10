@@ -1,6 +1,12 @@
 group 'com.deepar.ai'
 version '1.0'
 
+
+// For newer versions of DeepAR, check the changelog for the Android-platform:
+// https://docs.deepar.ai/deepar-sdk/platforms/android/changelog
+def DeepAR_Version = "5.5.1"
+
+
 buildscript {
     repositories {
         google()
@@ -16,8 +22,9 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
-        flatDir {
-            dirs 'libs'
+
+        maven {
+            url "https://sdk.developer.deepar.ai/maven-android-repository/releases/"
         }
     }
 }
@@ -25,7 +32,10 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 31
+    namespace 'com.deepar.ai'
+
+    // CameraX dependencies require compilation against version 33 or later.
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -33,14 +43,19 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 23
     }
 }
 
 dependencies {
-    
-    api (name: 'deepar', ext: 'aar')
-    implementation 'androidx.camera:camera-lifecycle:1.1.0-alpha01'
-    implementation "androidx.camera:camera-camera2:1.1.0-alpha01"
 
+    // For newer versions of CameraX, see
+    // https://developer.android.com/jetpack/androidx/releases/camera
+    // def camerax_version = "1.1.0-alpha01"
+    // def camerax_version = "1.2.3"
+    def camerax_version = "1.2.3"
+
+    implementation "androidx.camera:camera-lifecycle:${camerax_version}"
+    implementation "androidx.camera:camera-camera2:${camerax_version}"
+    api "ai.deepar.ar:DeepAR:${DeepAR_Version}"
 }
