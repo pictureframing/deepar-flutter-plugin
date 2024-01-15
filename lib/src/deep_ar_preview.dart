@@ -4,8 +4,7 @@ import 'deep_ar_controller.dart';
 
 /// Displays live preview with desired effects.
 class DeepArPreview extends StatefulWidget {
-  const DeepArPreview(this.deepArController, {Key? key, this.onViewCreated})
-      : super(key: key);
+  const DeepArPreview(this.deepArController, {Key? key, this.onViewCreated}) : super(key: key);
   final DeepArController deepArController;
   final Function? onViewCreated;
 
@@ -18,7 +17,8 @@ class _DeepArPreviewState extends State<DeepArPreview> {
   Widget build(BuildContext context) {
     return Center(
       child: AspectRatio(
-          aspectRatio: (1 / widget.deepArController.aspectRatio),
+          aspectRatio: widget.deepArController.aspectRatio,
+          // aspectRatio: (1 / widget.deepArController.aspectRatio),
           child: Platform.isAndroid ? _androidView() : _iOSView()),
     );
   }
@@ -31,8 +31,7 @@ class _DeepArPreviewState extends State<DeepArPreview> {
   }
 
   Widget _androidView() {
-    WidgetsBinding.instance
-        .addPostFrameCallback((timeStamp) => widget.onViewCreated?.call());
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) => widget.onViewCreated?.call());
     return widget.deepArController.isInitialized
         ? widget.deepArController.buildPreview()
         : const SizedBox.shrink();

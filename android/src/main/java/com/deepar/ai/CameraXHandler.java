@@ -31,7 +31,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
 public class CameraXHandler implements MethodChannel.MethodCallHandler {
-    CameraXHandler(Activity activity, long textureId, DeepAR deepAR, CameraResolutionPreset cameraResolutionPreset) {
+    CameraXHandler(Activity activity, long textureId, DeepAR deepAR, ResolutionPreset cameraResolutionPreset) {
         this.activity = activity;
         this.deepAR = deepAR;
         this.textureId = textureId;
@@ -46,12 +46,11 @@ public class CameraXHandler implements MethodChannel.MethodCallHandler {
     private ByteBuffer[] buffers;
     private int currentBuffer = 0;
     private static final int NUMBER_OF_BUFFERS = 2;
-    private final CameraResolutionPreset resolutionPreset;
+    private final ResolutionPreset resolutionPreset;
 
     private int defaultLensFacing = CameraSelector.LENS_FACING_FRONT;
     private int lensFacing = defaultLensFacing;
     private Camera camera;
-
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
@@ -65,7 +64,7 @@ public class CameraXHandler implements MethodChannel.MethodCallHandler {
                 result.success(true);
                 break;
             case "toggle_flash":
-                boolean isFlash= toggleFlash();
+                boolean isFlash = toggleFlash();
                 result.success(isFlash);
                 break;
             case "destroy":
@@ -94,8 +93,9 @@ public class CameraXHandler implements MethodChannel.MethodCallHandler {
     }
 
     private void flipCamera() {
-        lensFacing = lensFacing == CameraSelector.LENS_FACING_FRONT ? CameraSelector.LENS_FACING_BACK : CameraSelector.LENS_FACING_FRONT;
-        //unbind immediately to avoid mirrored frame.
+        lensFacing = lensFacing == CameraSelector.LENS_FACING_FRONT ? CameraSelector.LENS_FACING_BACK
+                : CameraSelector.LENS_FACING_FRONT;
+        // unbind immediately to avoid mirrored frame.
         ProcessCameraProvider cameraProvider = null;
         try {
             cameraProvider = future.get();
@@ -112,21 +112,21 @@ public class CameraXHandler implements MethodChannel.MethodCallHandler {
         future = ProcessCameraProvider.getInstance(activity);
         Executor executor = ContextCompat.getMainExecutor(activity);
 
-        int width;
-        int height;
-        int orientation = getScreenOrientation();
-        if (orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE || orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            width = resolutionPreset.getWidth();
-            height = resolutionPreset.getHeight();
-        } else {
-            width = resolutionPreset.getHeight();
-            height = resolutionPreset.getWidth();
-        }
+        int width = resolutionPreset.getWidth();
+        int height = resolutionPreset.getHeight();
+
+        // int orientation = getScreenOrientation();
+        // if (orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE ||
+        // orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+        // width = resolutionPreset.getWidth();
+        // height = resolutionPreset.getHeight();
+        // } else {
+        // width = resolutionPreset.getHeight();
+        // height = resolutionPreset.getWidth();
+        // }
         buffers = new ByteBuffer[NUMBER_OF_BUFFERS];
         for (int i = 0; i < NUMBER_OF_BUFFERS; i++) {
-            buffers[i] = ByteBuffer.allocateDirect
-                    (CameraResolutionPreset.P1920x1080.getWidth()
-                            * CameraResolutionPreset.P1920x1080.getHeight() * 3);
+            buffers[i] = ByteBuffer.allocateDirect(resolutionPreset.getWidth() * resolutionPreset.getHeight() * 3);
             buffers[i].order(ByteOrder.nativeOrder());
             buffers[i].position(0);
         }
@@ -151,7 +151,7 @@ public class CameraXHandler implements MethodChannel.MethodCallHandler {
 
                             byteData = new byte[ySize + uSize + vSize];
 
-                            //U and V are swapped
+                            // U and V are swapped
                             yBuffer.get(byteData, 0, ySize);
                             vBuffer.get(byteData, ySize, vSize);
                             uBuffer.get(byteData, ySize + vSize, uSize);
@@ -162,13 +162,10 @@ public class CameraXHandler implements MethodChannel.MethodCallHandler {
 
                                 try {
                                     long startTime = System.nanoTime();
-                                    deepAR.receiveFrame(buffers[currentBuffer],
-                                            image.getWidth(), image.getHeight(),
+                                    deepAR.receiveFrame(buffers[currentBuffer], image.getWidth(), image.getHeight(),
                                             image.getImageInfo().getRotationDegrees(),
                                             lensFacing == CameraSelector.LENS_FACING_FRONT,
-                                            DeepARImageFormat.YUV_420_888,
-                                            image.getPlanes()[1].getPixelStride()
-                                    );
+                                            DeepARImageFormat.YUV_420_888, image.getPlanes()[1].getPixelStride());
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                     Log.e("Error", "" + e);
@@ -182,17 +179,15 @@ public class CameraXHandler implements MethodChannel.MethodCallHandler {
 
                     CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
 
-                    ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
-                            .setTargetResolution(cameraResolution)
-                            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                            .build();
+                    ImageAnalysis imageAnalysis = new ImageAnalysis.Builder().setTargetResolution(cameraResolution)
+                            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
 
                     imageAnalysis.setAnalyzer(executor, analyzer);
 
                     processCameraProvider.unbindAll();
 
-                    camera = processCameraProvider.bindToLifecycle((LifecycleOwner) activity,
-                            cameraSelector, imageAnalysis);
+                    camera = processCameraProvider.bindToLifecycle((LifecycleOwner) activity, cameraSelector,
+                            imageAnalysis);
 
                     if (result != null) {
                         result.success(textureId);
@@ -209,7 +204,7 @@ public class CameraXHandler implements MethodChannel.MethodCallHandler {
 
     }
 
-    private void destroy(){
+    private void destroy() {
         ProcessCameraProvider cameraProvider = null;
         try {
             cameraProvider = future.get();
@@ -222,63 +217,63 @@ public class CameraXHandler implements MethodChannel.MethodCallHandler {
         deepAR = null;
     }
 
-    private int getScreenOrientation() {
+    // private int getScreenOrientation() {
 
-        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-        DisplayMetrics dm = new DisplayMetrics();
-        activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        int width = dm.widthPixels;
-        int height = dm.heightPixels;
-        int orientation;
-        // if the device's natural orientation is portrait:
-        if ((rotation == Surface.ROTATION_0
-                || rotation == Surface.ROTATION_180) && height > width ||
-                (rotation == Surface.ROTATION_90
-                        || rotation == Surface.ROTATION_270) && width > height) {
-            switch (rotation) {
-                case Surface.ROTATION_0:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-                    break;
-                case Surface.ROTATION_90:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                    break;
-                case Surface.ROTATION_180:
-                    orientation =
-                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-                    break;
-                case Surface.ROTATION_270:
-                    orientation =
-                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-                    break;
-                default:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-                    break;
-            }
-        }
-        // if the device's natural orientation is landscape or if the device
-        // is square:
-        else {
-            switch (rotation) {
-                case Surface.ROTATION_0:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                    break;
-                case Surface.ROTATION_90:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-                    break;
-                case Surface.ROTATION_180:
-                    orientation =
-                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-                    break;
-                case Surface.ROTATION_270:
-                    orientation =
-                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-                    break;
-                default:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                    break;
-            }
-        }
+    // int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+    // DisplayMetrics dm = new DisplayMetrics();
+    // activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+    // int width = dm.widthPixels;
+    // int height = dm.heightPixels;
+    // int orientation;
+    // // if the device's natural orientation is portrait:
+    // if ((rotation == Surface.ROTATION_0
+    // || rotation == Surface.ROTATION_180) && height > width ||
+    // (rotation == Surface.ROTATION_90
+    // || rotation == Surface.ROTATION_270) && width > height) {
+    // switch (rotation) {
+    // case Surface.ROTATION_0:
+    // orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+    // break;
+    // case Surface.ROTATION_90:
+    // orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+    // break;
+    // case Surface.ROTATION_180:
+    // orientation =
+    // ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+    // break;
+    // case Surface.ROTATION_270:
+    // orientation =
+    // ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+    // break;
+    // default:
+    // orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+    // break;
+    // }
+    // }
+    // // if the device's natural orientation is landscape or if the device
+    // // is square:
+    // else {
+    // switch (rotation) {
+    // case Surface.ROTATION_0:
+    // orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+    // break;
+    // case Surface.ROTATION_90:
+    // orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+    // break;
+    // case Surface.ROTATION_180:
+    // orientation =
+    // ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+    // break;
+    // case Surface.ROTATION_270:
+    // orientation =
+    // ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+    // break;
+    // default:
+    // orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+    // break;
+    // }
+    // }
 
-        return orientation;
-    }
+    // return orientation;
+    // }
 }

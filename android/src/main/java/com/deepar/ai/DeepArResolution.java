@@ -4,8 +4,8 @@ import ai.deepar.ar.CameraResolutionPreset;
 
 public class DeepArResolution {
 
-    static CameraResolutionPreset getResolutionPreset(String resolution){
-        switch (resolution){
+    static CameraResolutionPreset getResolutionPreset(String resolution) {
+        switch (resolution) {
             case "low":
                 return CameraResolutionPreset.P640x360;
             case "medium":
